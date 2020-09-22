@@ -42,7 +42,11 @@ function map(array, fn) {
    reduce([1, 2, 3], (all, current) => all + current) // 6
  */
 function reduce(array, fn, initial) {
-  return 6;
+  let result = initial ? initial : array[0];
+  for (let index = initial ? 0 : 1; index < array.length; index++) {
+    result = fn(result, array[index], index, array);
+  }
+  return result;
 }
 
 /*
@@ -73,9 +77,11 @@ function upperProps(obj) {
    console.log(obj.foo); // 4
  */
 function createProxy(obj) {
-  for (const key in obj) {
-    obj[key] = obj[key] ** 2;
-  }
+  return new Proxy(obj, {
+    set(obj, key, value) {
+      return (obj[key] = value ** 2);
+    },
+  });
 }
 
 export { forEach, map, reduce, upperProps, createProxy };
