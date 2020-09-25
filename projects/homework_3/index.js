@@ -112,29 +112,14 @@ function calculator(number = 0) {
   }
 
   return {
-    sum: (...args) => {
-      return args.reduce((sum, current) => {
-        return sum + current;
-      }, number);
-    },
-    dif(...args) {
-      return args.reduce((dif, current) => {
-        return dif - current;
-      }, number);
-    },
-    div(...args) {
-      return args.reduce((div, current) => {
-        if (current === 0) {
-          throw new Error('division by 0');
-        }
+    sum: (...args) => args.reduce((sum, current) => sum + current, number),
+    dif: (...args) => args.reduce((dif, current) => dif - current, number),
+    div: (...args) =>
+      args.reduce((div, current) => {
+        if (current === 0) throw new Error('division by 0');
         return div / current;
-      }, number);
-    },
-    mul(...args) {
-      return args.reduce((mul, current) => {
-        return mul * current;
-      }, number);
-    },
+      }, number),
+    mul: (...args) => args.reduce((mul, current) => mul * current, number),
   };
 }
 
