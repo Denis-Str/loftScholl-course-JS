@@ -105,13 +105,37 @@ function returnBadArguments(fn, ...args) {
    - number не является числом (с текстом "number is not a number")
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
+
 function calculator(number = 0) {
   if (isNaN(number)) {
     throw new Error('number is not a number');
   }
-  if (number === 0) {
-    throw new Error('division by 0');
-  }
+
+  return {
+    sum: (...args) => {
+      return args.reduce((sum, current) => {
+        return sum + current;
+      }, number);
+    },
+    dif(...args) {
+      return args.reduce((dif, current) => {
+        return dif - current;
+      }, number);
+    },
+    div(...args) {
+      return args.reduce((div, current) => {
+        if (current === 0) {
+          throw new Error('division by 0');
+        }
+        return div / current;
+      }, number);
+    },
+    mul(...args) {
+      return args.reduce((mul, current) => {
+        return mul * current;
+      }, number);
+    },
+  };
 }
 
 /* При решении задач, постарайтесь использовать отладчик */
