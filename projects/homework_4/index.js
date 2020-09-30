@@ -50,15 +50,10 @@ function prepend(what, where) {
  */
 function findAllPSiblings(where) {
   const result = [];
-  const children = where.childNodes;
 
-  for (let i = 0; i < children.length; i++) {
-    if (
-      children[i].nodeType === 1 &&
-      children[i].nextElementSibling !== null &&
-      children[i].nextElementSibling.tagName === 'P'
-    ) {
-      result.push(children[i]);
+  for (const child of where.children) {
+    if (child.nextElementSibling && child.nextElementSibling.tagName === 'P') {
+      result.push(child);
     }
   }
   return result;
@@ -81,14 +76,12 @@ function findAllPSiblings(where) {
 
    findError(document.body) // функция должна вернуть массив с элементами 'привет' и 'loftschool'
  */
+
 function findError(where) {
   const result = [];
-  const children = where.childNodes;
 
-  for (let i = 0; i < children.length; i++) {
-    if (children[i].nodeType === 1) {
-      result.push(children[i].textContent);
-    }
+  for (const child of where.children) {
+    result.push(child.textContent);
   }
   return result;
 }
@@ -106,11 +99,9 @@ function findError(where) {
    должно быть преобразовано в <div></div><p></p>
  */
 function deleteTextNodes(where) {
-  const children = where.childNodes;
-
-  for (let i = 0; i < children.length; i++) {
-    if (children[i].nodeType === 3) {
-      children[i].remove();
+  for (const child of where.childNodes) {
+    if (child.nodeType === 3) {
+      child.remove();
     }
   }
 }
@@ -127,11 +118,11 @@ function deleteTextNodes(where) {
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
 function deleteTextNodesRecursive(where) {
-  const children = where.childNodes;
-
-  for (let i = 0; i < children.length; i++) {
-    if (children[i].nodeType === 3) {
-      children[i].remove();
+  for (const child of where.childNodes) {
+    if (child.nodeType === 3) {
+      child.remove();
+    } else if (child.nodeType === 1) {
+      deleteTextNodesRecursive(child);
     }
   }
 }
@@ -156,8 +147,27 @@ function deleteTextNodesRecursive(where) {
      texts: 3
    }
  */
-function collectDOMStat(root) {}
+function collectDOMStat(root) {
+  const state = {
+    tags: {},
+    classes: {},
+    texts: 0,
+  };
 
+  const findState = (root) => {
+    for (const elem of root.childNodes) {
+      if (elem.nodeType === 3) {
+        state.texts++;
+      } else if (elem.nodeType === 1) {
+        console.log(elem);
+      }
+      findState(elem);
+    }
+  };
+  findState(root);
+
+  return state;
+}
 /*
  Задание 8 *:
 
