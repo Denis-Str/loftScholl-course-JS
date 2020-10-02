@@ -30,9 +30,6 @@ async function loadAndSortTowns() {
   const res = await fetch(url);
   const towns = await res.json();
   return towns.sort((a, b) => a.name.localeCompare(b.name));
-  // return fetch(url)
-  //   .then((response) => response.json())
-  //   .then((towns) => towns.sort((a, b) => a.name.localeCompare(b.name)));
 }
 
 export { delayPromise, loadAndSortTowns };

@@ -30,6 +30,7 @@
  */
 
 import './towns.html';
+import { loadAndSortTowns } from './functions';
 
 const homeworkContainer = document.querySelector('#homework-container');
 
@@ -39,32 +40,8 @@ const homeworkContainer = document.querySelector('#homework-container');
  Массив городов пожно получить отправив асинхронный запрос по адресу
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
-async function loadTowns() {
-  try {
-    const url =
-      'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json';
-    const res = await fetch(url);
-    const towns = await res.json();
-    towns.sort((a, b) => a.name.localeCompare(b.name));
-    const ul = document.createElement('ul');
-    const li = document.createElement('li');
-    ul.appendChild(li);
-
-    for (const town of towns) {
-      const li = document.createElement('li');
-      li.innerText = town.name;
-      ul.appendChild(li);
-    }
-    loadingBlock.classList.add('hidden');
-    homeworkContainer.appendChild(ul);
-    filterBlock.classList.remove('hidden');
-    return towns;
-  } catch (e) {
-    loadingBlock.classList.add('hidden');
-    loadingFailedBlock.classList.remove('hidden');
-    retryButton.classList.remove('hidden');
-    console.log('ошибка');
-  }
+function loadTowns() {
+  return loadAndSortTowns();
 }
 
 /*
@@ -79,7 +56,7 @@ async function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
-  return (filterResult.textContent = chunk);
+  return full.toLowerCase().includes(chunk.toLowerCase());
 }
 
 /* Блок с надписью "Загрузка" */
@@ -95,23 +72,47 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-loadTowns();
-isMatching();
-// loadingBlock();
-// filterResult();
+const towns = [];
 
-retryButton.addEventListener('click', (e) => {
-  e.preventDefault();
-  loadTowns();
+retryButton.addEventListener('click', () => {
+  isLoader();
 });
 
-filterInput.addEventListener('input', (e) => {
-  e.preventDefault();
-  const target = e.target.value;
-  return target;
+filterInput.addEventListener('input', () => {
+  updateFilter(this.value);
 });
 
 loadingFailedBlock.classList.add('hidden');
 filterBlock.classList.add('hidden');
+
+async function isLoader() {
+  try {
+    //towns = await loadTowns();
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.add('hidden');
+    filterBlock.classList.remove('hidden');
+  } catch (e) {
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.remove('hidden');
+  }
+}
+
+function updateFilter(filterValue) {
+  filterResult.innerHTML = '';
+
+  const fragment = document.createDocumentFragment();
+
+  for (const town of towns) {
+    if (filterValue && isMatching(town.name, filterValue)) {
+      const div = document.createElement('div');
+      div.textContent = town.name;
+      fragment.append(div);
+    }
+  }
+
+  filterResult.append(fragment);
+}
+
+isLoader();
 
 export { loadTowns, isMatching };
