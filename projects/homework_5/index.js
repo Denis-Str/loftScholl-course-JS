@@ -72,14 +72,14 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-const towns = [];
+let towns = [];
 
 retryButton.addEventListener('click', () => {
   isLoader();
 });
 
-filterInput.addEventListener('input', () => {
-  updateFilter(this.value);
+filterInput.addEventListener('input', (e) => {
+  updateFilter(e.target.value);
 });
 
 loadingFailedBlock.classList.add('hidden');
@@ -87,7 +87,7 @@ filterBlock.classList.add('hidden');
 
 async function isLoader() {
   try {
-    //towns = await loadTowns();
+    towns = await loadTowns();
     loadingBlock.classList.add('hidden');
     loadingFailedBlock.classList.add('hidden');
     filterBlock.classList.remove('hidden');
