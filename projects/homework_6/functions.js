@@ -9,7 +9,7 @@
    addListener('click', document.querySelector('a'), () => console.log('...')) // должна добавить указанный обработчик кликов на указанный элемент
  */
 function addListener(eventName, target, fn) {
-  return target.addEventListener(eventName, fn());
+  return target.addEventListener(eventName, fn);
 }
 
 /*
@@ -58,17 +58,9 @@ function emulateClick(target) {
    delegate(document.body, () => console.log('кликнули на button')) // добавит такой обработчик кликов для body, который будет вызывать указанную функцию только если кликнули на кнопку (элемент с тегом button)
  */
 function delegate(target, fn) {
-  // for (const elem of target.children) {
-  //   if (elem.tagName === 'BUTTON') {
-  //     console.log(elem.tagName);
-  //     return elem.addEventListener('click', fn());
-  //   }
-  // }
   target.addEventListener('click', (e) => {
     e.preventDefault();
-    if (e.target.tagName === 'BUTTON') {
-      return e.target.addEventListener('click', fn());
-    }
+    if (e.target.tagName === 'BUTTON') return fn();
   });
 }
 
@@ -86,6 +78,7 @@ function once(target, fn) {
   return target.addEventListener('click', () => {
     if (!flag) {
       fn();
+      //target.removeEventListener('click', fn);
       flag = true;
     }
   });
