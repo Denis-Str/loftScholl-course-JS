@@ -37,16 +37,96 @@ const homeworkContainer = document.querySelector('#homework-container');
 // текстовое поле для фильтрации cookie
 const filterNameInput = homeworkContainer.querySelector('#filter-name-input');
 // текстовое поле с именем cookie
-//const addNameInput = homeworkContainer.querySelector('#add-name-input');
+const addNameInput = homeworkContainer.querySelector('#add-name-input');
 // текстовое поле со значением cookie
-//const addValueInput = homeworkContainer.querySelector('#add-value-input');
+const addValueInput = homeworkContainer.querySelector('#add-value-input');
 // кнопка "добавить cookie"
 const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('input', function () {});
+const cookiesData = parseCookie();
+renderCookieData();
 
-addButton.addEventListener('click', () => {});
+filterNameInput.addEventListener('input', function (e) {
+  updateFilter(e.target.value);
+});
 
-listTable.addEventListener('click', (e) => {});
+addButton.addEventListener('click', () => {
+  const cookieName = addNameInput;
+  const cookieValue = addValueInput;
+
+  for (const cookie in cookiesData) {
+    if (cookie === cookieName.value) {
+      cookiesData[cookie] = cookieValue.value;
+      document.cookie = `${cookieName.value}=${cookieValue.value}`;
+      return renderCookieData();
+    }
+  }
+  listTable.appendChild(renderRowTable(cookieName.value, cookieValue.value));
+  document.cookie = `${cookieName.value}=${cookieValue.value}`;
+
+  cookieName.value = '';
+  cookieValue.value = '';
+  return cookiesData;
+});
+
+listTable.addEventListener('click', (e) => {
+  e.preventDefault();
+  const target = e.target;
+  //  костыль кончно родитель родителя :)
+  const cookieName = target.parentElement.parentElement.firstElementChild.textContent;
+  for (const cookie in cookiesData) {
+    if (cookie === cookieName) {
+      console.log('delete');
+      // не функциклирует :(
+      //document.cookie = `${cookieName}; max-age:-1`;
+      //cookiesData.delete(cookie);
+    }
+  }
+  if (target.tagName === 'BUTTON') {
+    target.parentElement.parentElement.remove();
+  }
+});
+
+function parseCookie() {
+  return document.cookie.split('; ').reduce((prev, current) => {
+    const [name, value] = current.split('=');
+    prev[name] = value;
+    return prev;
+  }, {});
+}
+
+function renderCookieData() {
+  listTable.innerHTML = '';
+  for (const cookie in cookiesData) {
+    listTable.appendChild(renderRowTable(cookie, cookiesData[cookie]));
+  }
+  return listTable;
+}
+
+function renderRowTable(name, value) {
+  const fragment = document.createDocumentFragment();
+  const row = document.createElement('tr');
+  row.innerHTML = `
+      <td>${name}</td>
+      <td>${value}</td>
+      <td><button>delete</button></td>
+    `;
+  return fragment.appendChild(row);
+}
+
+function updateFilter(filterValue) {
+  listTable.innerHTML = '';
+  // если стереть filterValue то таблица обновляется после перезагрузеи страницы
+  for (const cookie in cookiesData) {
+    if (filterValue && isMatching(cookie, filterValue)) {
+      listTable.append(renderRowTable(cookie, cookiesData[cookie]));
+    }
+  }
+  return listTable;
+}
+
+function isMatching(full, chunk) {
+  return full.toLowerCase().includes(chunk.toLowerCase());
+}
