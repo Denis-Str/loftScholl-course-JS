@@ -60,32 +60,29 @@ addButton.addEventListener('click', () => {
     if (cookie === cookieName.value) {
       cookiesData[cookie] = cookieValue.value;
       document.cookie = `${cookieName.value}=${cookieValue.value}`;
+      window.location.reload();
       return renderCookieData();
     }
   }
   listTable.appendChild(renderRowTable(cookieName.value, cookieValue.value));
   document.cookie = `${cookieName.value}=${cookieValue.value}`;
-
-  cookieName.value = '';
-  cookieValue.value = '';
-  return cookiesData;
+  window.location.reload();
+  return renderCookieData();
 });
 
 listTable.addEventListener('click', (e) => {
   e.preventDefault();
   const target = e.target;
-  //  костыль кончно родитель родителя :)
   const cookieName = target.parentElement.parentElement.firstElementChild.textContent;
+  const date = new Date(0);
   for (const cookie in cookiesData) {
     if (cookie === cookieName) {
-      console.log('delete');
-      // не функциклирует :(
-      //document.cookie = `${cookieName}; max-age:-1`;
-      //cookiesData.delete(cookie);
+      document.cookie = `${cookieName}=; path=/; expires=" ${date.toUTCString()}`;
     }
   }
   if (target.tagName === 'BUTTON') {
     target.parentElement.parentElement.remove();
+    window.location.reload();
   }
 });
 
@@ -118,7 +115,9 @@ function renderRowTable(name, value) {
 
 function updateFilter(filterValue) {
   listTable.innerHTML = '';
-  // если стереть filterValue то таблица обновляется после перезагрузеи страницы
+  if (!filterValue) {
+    return window.location.reload();
+  }
   for (const cookie in cookiesData) {
     if (filterValue && isMatching(cookie, filterValue)) {
       listTable.append(renderRowTable(cookie, cookiesData[cookie]));
