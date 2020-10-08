@@ -46,58 +46,46 @@ const addButton = homeworkContainer.querySelector('#add-button');
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
 const cookiesData = parseCookie();
-renderCookieData();
+renderCookieData(cookiesData);
 
 filterNameInput.addEventListener('input', function (e) {
-  updateFilter(e.target.value);
+  filter();
 });
 
 addButton.addEventListener('click', () => {
-  const cookieName = addNameInput;
-  const cookieValue = addValueInput;
+  const name = addNameInput.value.trim();
+  const value = addValueInput.value.trim();
 
-  for (const cookie in cookiesData) {
-    if (cookie === cookieName.value) {
-      cookiesData[cookie] = cookieValue.value;
-      document.cookie = `${cookieName.value}=${cookieValue.value}`;
-      window.location.reload();
-      return renderCookieData();
-    }
-  }
-  listTable.appendChild(renderRowTable(cookieName.value, cookieValue.value));
-  document.cookie = `${cookieName.value}=${cookieValue.value}`;
-  window.location.reload();
-  return renderCookieData();
+  document.cookie = `${name}=${value}`;
+  filter();
 });
 
 listTable.addEventListener('click', (e) => {
-  e.preventDefault();
   const target = e.target;
-  const cookieName = target.parentElement.parentElement.firstElementChild.textContent;
-  const date = new Date(0);
-  for (const cookie in cookiesData) {
-    if (cookie === cookieName) {
-      document.cookie = `${cookieName}=; path=/; expires=" ${date.toUTCString()}`;
-    }
-  }
   if (target.tagName === 'BUTTON') {
+    const cookieName = target.parentElement.parentElement.firstElementChild.textContent;
+    const date = new Date(0);
+    document.cookie = `${cookieName}=; path=/; expires=" ${date.toUTCString()}`;
     target.parentElement.parentElement.remove();
-    window.location.reload();
   }
 });
 
 function parseCookie() {
-  return document.cookie.split('; ').reduce((prev, current) => {
-    const [name, value] = current.split('=');
-    prev[name] = value;
-    return prev;
-  }, {});
+  if (document.cookie) {
+    return document.cookie.split('; ').reduce((prev, current) => {
+      const [name, value] = current.split('=');
+      prev[name] = value;
+      return prev;
+    }, {});
+  } else {
+    return {};
+  }
 }
 
-function renderCookieData() {
+function renderCookieData(cookieData = {}) {
   listTable.innerHTML = '';
-  for (const cookie in cookiesData) {
-    listTable.appendChild(renderRowTable(cookie, cookiesData[cookie]));
+  for (const cookie in cookieData) {
+    listTable.appendChild(renderRowTable(cookie, cookieData[cookie]));
   }
   return listTable;
 }
@@ -113,17 +101,17 @@ function renderRowTable(name, value) {
   return fragment.appendChild(row);
 }
 
-function updateFilter(filterValue) {
-  listTable.innerHTML = '';
-  if (!filterValue) {
-    return window.location.reload();
-  }
-  for (const cookie in cookiesData) {
-    if (filterValue && isMatching(cookie, filterValue)) {
-      listTable.append(renderRowTable(cookie, cookiesData[cookie]));
+function filter() {
+  const cookies = parseCookie();
+  for (const cookie in cookies) {
+    if (
+      !isMatching(cookie, filterNameInput.value.trim()) &&
+      !isMatching(cookies[cookie], filterNameInput.value.trim())
+    ) {
+      delete cookies[cookie];
     }
   }
-  return listTable;
+  renderCookieData(cookies);
 }
 
 function isMatching(full, chunk) {
